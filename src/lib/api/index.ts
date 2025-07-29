@@ -1,6 +1,11 @@
 import ky from "ky"
 import { useAuthStore } from "../../stores/authStore"
 
+export interface ApiError {
+  error: string
+  code: number
+}
+
 export const api = ky.create({
   prefixUrl: "/api",
   hooks: {

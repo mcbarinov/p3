@@ -4,17 +4,18 @@ import { toast } from "sonner"
 
 export async function login(username: string, password: string): Promise<void> {
   console.log(`Logging in with username: ${username}`)
-  try {
-    const res = await authApi.login({ username, password })
-    console.log("Login response:", res)
-    const login = useAuthStore.getState().login
-    login(res.sessionId, res.userId, username)
-    toast.success("Login successful")
-    window.location.href = "/"
-  } catch (error) {
-    const message = error instanceof Error ? error.message : "Login failed"
-    toast.error(message)
+
+  const res = await authApi.login({ username, password })
+  if (res.isErr()) {
+    console.error("Login failed:", res.error)
+    toast.error("Login failed: " + res.error.error)
+    return
   }
+  console.log("Login response:", res)
+  const login = useAuthStore.getState().login
+  login(res.sessionId, res.userId, username)
+  toast.success("Login successful")
+  window.location.href = "/"
 }
 
 export function logout(): Promise<void> {

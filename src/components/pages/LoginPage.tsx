@@ -20,7 +20,6 @@ export default function LoginPage() {
   })
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    console.log("Form submitted:", values)
     await login(values.username, values.password)
   }
 
