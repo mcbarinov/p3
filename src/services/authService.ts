@@ -15,11 +15,7 @@ async function login(username: string, password: string): Promise<void> {
 }
 
 async function logout(): Promise<void> {
-  const res = await authApi.logout()
-  if (res.isErr()) {
-    toast.error("Logout failed: " + res.error.error)
-    return
-  }
+  await authApi.logout()
   const { logout: storeLogout } = useAuthStore.getState()
   storeLogout()
   window.location.href = "/login"

@@ -5,6 +5,12 @@ const USERS = [
   { userId: 2, username: "user2", password: "password2", sessionId: "session2" },
 ]
 
+const DATA1_LIST = [
+  { id: 1, name: "Data 1", tags: ["tag1", "tag2"] },
+  { id: 2, name: "Data 2", tags: ["tag2", "tag3"] },
+  { id: 3, name: "Data 3", tags: ["tag1", "tag3"] },
+]
+
 const sleep = (ms: number) => new Promise((res) => setTimeout(res, ms))
 
 export const handlers = [
@@ -23,5 +29,20 @@ export const handlers = [
   http.post("/api/auth/logout", async () => {
     await sleep(500) // Simulate network delay
     return HttpResponse.json({ message: "Logged out successfully" })
+  }),
+
+  http.get("/api/data1", async () => {
+    await sleep(500) // Simulate network delay
+    return HttpResponse.json(DATA1_LIST)
+  }),
+
+  http.get("/api/data1/:id", async ({ params }) => {
+    await sleep(500) // Simulate network delay
+    const data = DATA1_LIST.find((d) => d.id === parseInt(params.id, 10))
+    if (data) {
+      return HttpResponse.json(data)
+    } else {
+      return HttpResponse.json({ error: "Data not found" }, { status: 404 })
+    }
   }),
 ]
