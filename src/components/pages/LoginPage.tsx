@@ -5,10 +5,11 @@ import { z } from "zod"
 import { Form, FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
+import { login } from "@/services/authService"
 
 const formSchema = z.object({
-  username: z.string().min(1).max(100),
-  password: z.string().min(6).max(100),
+  username: z.string().min(1, { message: "Username must be between 1 and 100 characters" }),
+  password: z.string().min(6, { message: "Password must be between 6 and 100 characters" }),
 })
 
 export default function LoginPage() {
@@ -17,8 +18,9 @@ export default function LoginPage() {
     defaultValues: { username: "", password: "" },
   })
 
-  const onSubmit = (values: z.infer<typeof formSchema>) => {
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
     console.log("Form submitted:", values)
+    await login(values.username, values.password)
   }
 
   return (
