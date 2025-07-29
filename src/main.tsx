@@ -4,10 +4,19 @@ import "./index.css"
 import App from "./App.tsx"
 import { worker } from "./lib/api/mock/browser.ts"
 
-worker.start()
+async function prepare() {
+  if (import.meta.env.DEV) {
+    await worker.start({
+      onUnhandledRequest: "warn",
+    })
+    console.log("MSW started successfully")
+  }
+}
 
-createRoot(document.getElementById("root")!).render(
-  <StrictMode>
-    <App />
-  </StrictMode>
-)
+prepare().then(() => {
+  createRoot(document.getElementById("root")!).render(
+    <StrictMode>
+      <App />
+    </StrictMode>
+  )
+})
