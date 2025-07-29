@@ -11,8 +11,7 @@ export default function Header() {
     <header className="border-b py-5">
       <nav className="flex items-center h-14 gap-8">
         <h1>P3</h1>
-        <Link to="/data1">Data1</Link>
-        <Link to="/data2">Data2</Link>
+        <Link to="/forums">Forums</Link>
         <DropdownMenu>
           <DropdownMenuTrigger className="flex items-center gap-1">
             <User className="w-4 h-4" />

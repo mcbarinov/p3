@@ -1,5 +1,21 @@
-export type Data1 = {
+export type Forum = {
   id: number
-  name: string
-  tags: string[]
+  title: string
+  description: string
+  members: number[]
+}
+
+export type Post = {
+  id: number
+  title: string
+  content: string
+  authorId: number
+  createdAt: Date
+}
+
+export type Comment = {
+  id: number
+  content: string
+  authorId: number
+  createdAt: Date
 }
