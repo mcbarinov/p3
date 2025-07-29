@@ -3,11 +3,11 @@ import { persist, devtools } from "zustand/middleware"
 
 interface AuthState {
   sessionId: string | null
-  userId: string | null
+  userId: number | null
   username: string | null
   isAuthenticated: boolean
 
-  login: (sessionId: string, userId: string, username: string) => void
+  login: (sessionId: string, userId: number, username: string) => void
   logout: () => void
 }
 

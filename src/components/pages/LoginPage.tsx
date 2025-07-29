@@ -6,6 +6,7 @@ import { Form, FormControl, FormField, FormItem, FormMessage } from "@/component
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { login } from "@/services/authService"
+import { Toaster } from "@/components/ui/sonner"
 
 const formSchema = z.object({
   username: z.string().min(1, { message: "Username must be between 1 and 100 characters" }),
@@ -25,6 +26,7 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center">
+      <Toaster position="top-center" />
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle>Login</CardTitle>
