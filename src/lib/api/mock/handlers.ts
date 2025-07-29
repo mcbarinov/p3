@@ -19,4 +19,9 @@ export const handlers = [
       return HttpResponse.json({ error: "Invalid credentials" }, { status: 401 })
     }
   }),
+
+  http.post("/api/auth/logout", async () => {
+    await sleep(500) // Simulate network delay
+    return HttpResponse.json({ message: "Logged out successfully" })
+  }),
 ]
