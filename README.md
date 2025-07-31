@@ -74,8 +74,9 @@ The application follows a strict three-layer architecture pattern:
   - Returns `Result<T, E>` for explicit error handling
   - Clean interfaces for request/response types
   - Uses unified `apiClient` wrapper for DRY code
-- **Example**: `authApi.login()` returns `Result<LoginResponse, ApiError>`
+- **Example**: `api.auth.login()` returns `Result<LoginResponse, ApiError>`
 - **Implementation**: All API methods use `apiClient.get/post/put/patch/delete<T>()` for consistency
+- **Access Pattern**: `import { api } from "@/lib/api"` → `api.auth.login()`, `api.forum.getForums()`
 
 **Architectural Exception**: The base API client (`api/index.ts`) accesses `authStore` to automatically attach session headers to all requests. This is an intentional violation for developer convenience, eliminating the need to manually pass sessionId to every authenticated API call.
 

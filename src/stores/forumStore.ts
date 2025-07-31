@@ -1,16 +1,20 @@
 import { create } from "zustand"
-import type { Forum, Post } from "@/types"
+import { persist } from "zustand/middleware"
+import type { Forum } from "@/types"
 
 interface ForumState {
   forums: Forum[]
-  posts: Post[]
   setForums: (forums: Forum[]) => void
-  setPosts: (posts: Post[]) => void
 }
 
-export const useForumStore = create<ForumState>((set) => ({
-  forums: [],
-  posts: [],
-  setForums: (forums) => set({ forums }),
-  setPosts: (posts) => set({ posts }),
-}))
+export const useForumStore = create<ForumState>()(
+  persist(
+    (set) => ({
+      forums: [],
+      setForums: (forums) => set({ forums }),
+    }),
+    {
+      name: "forum-store",
+    }
+  )
+)

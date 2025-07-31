@@ -1,10 +1,11 @@
 import { toast } from "sonner"
-import { forumApi } from "@/lib/api/forum"
+import { api } from "@/lib/api"
 import { useForumStore } from "@/stores/forumStore"
+import type { Post } from "@/types"
 
 export const forumService = {
   loadForums: async (): Promise<void> => {
-    const result = await forumApi.getForums()
+    const result = await api.forum.getForums()
 
     if (result.isOk()) {
       useForumStore.getState().setForums(result.value)
@@ -13,13 +14,14 @@ export const forumService = {
     }
   },
 
-  loadForumPosts: async (forumId: number): Promise<void> => {
-    const result = await forumApi.getForumPosts(forumId)
+  getForumPosts: async (forumId: number): Promise<Post[]> => {
+    const result = await api.forum.getForumPosts(forumId)
 
     if (result.isOk()) {
-      useForumStore.getState().setPosts(result.value)
+      return result.value
     } else {
       toast.error("Failed to load forum posts")
+      return []
     }
   },
 }

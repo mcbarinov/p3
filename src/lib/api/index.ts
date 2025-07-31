@@ -58,7 +58,7 @@ async function parseApiError(error: unknown): Promise<ApiError> {
   }
 }
 
-const api = ky.create({
+const httpClient = ky.create({
   prefixUrl: "/api",
   hooks: {
     beforeRequest: [
@@ -87,13 +87,22 @@ async function apiRequest<T>(request: Promise<T>): Promise<Result<T, ApiError>> 
 }
 
 export const apiClient = {
-  get: <T>(url: string) => apiRequest(api.get(url).json<T>()),
+  get: <T>(url: string) => apiRequest(httpClient.get(url).json<T>()),
 
-  post: <T>(url: string, data?: unknown) => apiRequest(api.post(url, { json: data }).json<T>()),
+  post: <T>(url: string, data?: unknown) => apiRequest(httpClient.post(url, { json: data }).json<T>()),
 
-  put: <T>(url: string, data?: unknown) => apiRequest(api.put(url, { json: data }).json<T>()),
+  put: <T>(url: string, data?: unknown) => apiRequest(httpClient.put(url, { json: data }).json<T>()),
 
-  patch: <T>(url: string, data?: unknown) => apiRequest(api.patch(url, { json: data }).json<T>()),
+  patch: <T>(url: string, data?: unknown) => apiRequest(httpClient.patch(url, { json: data }).json<T>()),
 
-  delete: <T>(url: string) => apiRequest(api.delete(url).json<T>()),
+  delete: <T>(url: string) => apiRequest(httpClient.delete(url).json<T>()),
+}
+
+// Unified API export (similar to services)
+import { authApi } from "./auth"
+import { forumApi } from "./forum"
+
+export const api = {
+  auth: authApi,
+  forum: forumApi,
 }
