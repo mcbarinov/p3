@@ -1,11 +1,10 @@
 import { Link } from "react-router"
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu"
-import { useAuthStore } from "@/stores/authStore"
 import { ChevronDown, User } from "lucide-react"
-import { services } from "@/services"
+import { useAuth } from "@/hooks"
 
 export default function Header() {
-  const { username } = useAuthStore()
+  const { username, logout } = useAuth()
 
   return (
     <header className="border-b py-5">
@@ -20,7 +19,7 @@ export default function Header() {
           </DropdownMenuTrigger>
           <DropdownMenuContent>
             <DropdownMenuItem>Change Password</DropdownMenuItem>
-            <DropdownMenuItem onClick={services.auth.logout}>Logout</DropdownMenuItem>
+            <DropdownMenuItem onClick={logout}>Logout</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </nav>

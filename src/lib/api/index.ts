@@ -98,7 +98,7 @@ export const apiClient = {
   delete: <T>(url: string) => apiRequest(httpClient.delete(url).json<T>()),
 }
 
-// Unified API export (similar to services)
+// Unified API export (similar to hooks)
 import { authApi } from "./auth"
 import { forumApi } from "./forum"
 

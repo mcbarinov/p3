@@ -1,15 +1,25 @@
-import { useEffect } from "react"
 import { Link } from "react-router"
 import { Users } from "lucide-react"
-import { services } from "@/services"
-import { useForumStore } from "@/stores/forumStore"
+import { useForums } from "@/hooks"
 
 export default function ForumsPage() {
-  const forums = useForumStore((state) => state.forums)
+  const { forums, loading, error } = useForums()
 
-  useEffect(() => {
-    services.forum.loadForums()
-  }, [])
+  if (loading) {
+    return (
+      <div className="container mx-auto py-8">
+        <div className="text-center">Loading forums...</div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="container mx-auto py-8">
+        <div className="text-center text-red-600">Error loading forums: {error.error}</div>
+      </div>
+    )
+  }
 
   return (
     <div className="container mx-auto py-8">

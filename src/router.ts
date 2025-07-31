@@ -3,7 +3,7 @@ import LoginPage from "./pages/LoginPage"
 import Layout from "./components/layout/Layout"
 import IndexPage from "./pages/IndexPage"
 import ForumsPage from "./pages/ForumsPage"
-import ForumDetailPage from "./pages/ForumDetailPage"
+import ForumPostsPage from "./pages/ForumPostsPage"
 import { useAuthStore } from "./stores/authStore"
 
 function requireAuth() {
@@ -26,7 +26,7 @@ export const router = createBrowserRouter([
     children: [
       { index: true, Component: IndexPage },
       { path: "forums", Component: ForumsPage },
-      { path: "forums/:forumId", Component: ForumDetailPage },
+      { path: "forums/:forumId", Component: ForumPostsPage },
     ],
   },
 ])

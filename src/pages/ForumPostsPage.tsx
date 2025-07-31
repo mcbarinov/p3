@@ -1,35 +1,69 @@
-import { useEffect, useState } from "react"
+import { useState, useCallback, useEffect } from "react"
 import { Link, useParams } from "react-router"
 import { ArrowLeft, User, Calendar } from "lucide-react"
-import { services } from "@/services"
-import { useForumStore } from "@/stores/forumStore"
+import { useForums } from "@/hooks"
+import { api } from "@/lib/api"
 import { formatDate } from "@/utils/date"
+import type { ApiError } from "@/lib/api"
 import type { Post } from "@/types"
 
-export default function ForumDetailPage() {
-  const { forumId } = useParams<{ forumId: string }>()
-  const forums = useForumStore((state) => state.forums)
-  const forum = forums.find((f) => f.id === Number(forumId))
+// Local hook - used only in this component
+function usePosts(forumId: number | undefined) {
   const [posts, setPosts] = useState<Post[]>([])
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<ApiError | null>(null)
 
-  useEffect(() => {
+  const loadPosts = useCallback(async () => {
     if (!forumId) return
 
-    const loadPosts = async () => {
-      setLoading(true)
-      const postsData = await services.forum.getForumPosts(Number(forumId))
-      setPosts(postsData)
-      setLoading(false)
+    setLoading(true)
+    setError(null)
+
+    const result = await api.forum.getForumPosts(forumId)
+
+    if (result.isOk()) {
+      setPosts(result.value)
+    } else {
+      setError(result.error)
+      setPosts([])
     }
 
-    loadPosts()
+    setLoading(false)
   }, [forumId])
+
+  // Auto-load posts when forumId changes
+  useEffect(() => {
+    if (forumId) {
+      loadPosts()
+    }
+  }, [forumId, loadPosts])
+
+  return {
+    posts,
+    loading,
+    error,
+    refetch: loadPosts,
+  }
+}
+
+export default function ForumPostsPage() {
+  const { forumId } = useParams<{ forumId: string }>()
+  const { forums } = useForums()
+  const forum = forums.find((f) => f.id === Number(forumId))
+  const { posts, loading, error } = usePosts(Number(forumId))
 
   if (loading) {
     return (
       <div className="container mx-auto py-8">
         <div className="text-center">Loading...</div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="container mx-auto py-8">
+        <div className="text-center text-red-600">Error loading posts: {error.error}</div>
       </div>
     )
   }

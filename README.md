@@ -52,9 +52,9 @@ The project implements a forum system where:
 - **Developer Experience**: APIs are designed to be intuitive and require minimal boilerplate
 - **Consistency**: Similar patterns are used across all layers for predictability
 
-### Three-Layer Architecture
+### Hook-Based Architecture
 
-The application follows a strict three-layer architecture pattern:
+The application follows a modern hook-based architecture pattern:
 
 #### 1. Stores (State Management)
 
@@ -80,18 +80,101 @@ The application follows a strict three-layer architecture pattern:
 
 **Architectural Exception**: The base API client (`api/index.ts`) accesses `authStore` to automatically attach session headers to all requests. This is an intentional violation for developer convenience, eliminating the need to manually pass sessionId to every authenticated API call.
 
-#### 3. Services (Business Logic)
+#### 3. Hooks (Business Logic & React Integration)
 
-- **Principle**: Orchestration and side effects with simplified interface
+- **Principle**: Custom React hooks that combine data, actions, and state management
 - **Rules**:
-  - Combines stores, APIs, and other services
+  - Combines stores, APIs, and React state in a single hook
   - Handles all side effects (navigation, toasts, etc.)
-  - Contains business logic and workflows
-  - Returns `Promise<void>` - no Result handling needed in components
-  - All error handling (toasts, redirects) happens internally
-  - Used directly by React components via unified `services` export
-- **Example**: `services.auth.login()` calls API, updates store, shows toast, and navigates
-- **Access Pattern**: `import { services } from "@/services"` → `services.auth.login()`
+  - Provides auto-loading functionality - no manual useEffect needed
+  - Returns unified interface: `{ data, loading, error, actions }`
+  - **Colocation**: Hooks are defined where they're used - only shared hooks go in `/hooks`
+  - Component-specific hooks are defined in the component file itself
+- **Example**: `useAuth()` provides login/logout actions + user data + loading states with auto-loading
+- **Access Patterns**:
+  - Shared hooks: `import { useAuth } from "@/hooks"`
+  - Local hooks: Defined directly in component file
+
+**Hook Examples:**
+
+```typescript
+// Authentication with auto-loading user data
+import { useAuth } from "@/hooks"
+
+function LoginPage() {
+  const { login, loading, error } = useAuth()
+
+  const handleSubmit = async (username, password) => {
+    await login(username, password) // handles API, store, navigation, toasts
+  }
+}
+
+function Header() {
+  const { username, logout } = useAuth() // gets data + actions from one source
+}
+
+// Shared hook - Forums data with auto-loading
+import { useForums } from "@/hooks"
+
+function ForumsPage() {
+  const { forums, loading, error } = useForums() // auto-loads on mount
+  // No manual useEffect needed!
+}
+
+// Local hook - defined in the component file
+function usePosts(forumId: number) {
+  const [posts, setPosts] = useState<Post[]>([])
+  const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    // fetch posts logic
+  }, [forumId])
+
+  return { posts, loading }
+}
+
+function ForumPostsPage() {
+  const { posts, loading } = usePosts(Number(forumId)) // local hook
+}
+```
+
+**Colocation Principle:**
+
+- **Local hooks**: Component-specific hooks are defined in the component file
+- **Shared hooks**: Only hooks used in multiple components go in `/hooks` directory
+- **Benefits**: Easier to understand, modify, and maintain when logic is close to usage
+
+**Key Benefits:**
+
+- **Auto-loading**: Data loads automatically, no manual useEffect required
+- **Unified Interface**: Get data + actions + loading/error states from one hook
+- **React Integration**: Built-in React lifecycle and state management
+- **Simplicity**: Fewer abstractions than service layer approach
+- **Colocation**: Related code stays together, improving maintainability
+
+### Project Structure
+
+```
+src/
+├── hooks/                     # Shared React hooks (used in multiple components)
+│   ├── useAuth.ts            # Authentication hook (used in LoginPage, Header, etc.)
+│   ├── useForums.ts          # Forums data hook (used in ForumsPage, ForumPostsPage)
+│   └── index.ts              # Unified hooks export
+├── stores/                   # Zustand state stores
+│   ├── authStore.ts          # Authentication state
+│   └── forumStore.ts         # Forum data state
+├── lib/api/                  # HTTP API layer
+│   ├── auth.ts               # Auth API endpoints
+│   ├── forum.ts              # Forum API endpoints
+│   └── index.ts              # Unified API client
+├── components/               # React components
+│   ├── ui/                   # Reusable UI primitives
+│   ├── layout/               # Layout components
+│   └── shared/               # Business components
+└── pages/                    # Page components
+    ├── LoginPage.tsx         # Simple page
+    └── ForumPostsPage.tsx    # Contains usePosts hook (local to this component)
+```
 
 ### Component Organization
 
@@ -140,9 +223,11 @@ src/
 
 ## Architecture Benefits
 
-- **Simplicity**: Minimal boilerplate, intuitive APIs, easy to understand
-- **Developer Experience**: Single import for services, no Result handling in components
-- **Testability**: Each layer can be tested in isolation
-- **Maintainability**: Clear separation of concerns with consistent patterns
-- **Predictability**: Data flow is unidirectional and explicit
+- **Simplicity**: Minimal boilerplate, intuitive hook APIs, easy to understand
+- **Developer Experience**: Single import for hooks, auto-loading data, unified interface for data + actions
+- **Modern React**: Uses standard React patterns that developers already know
+- **No Manual Effects**: Auto-loading eliminates need for manual useEffect in components
+- **Testability**: Hooks can be tested in isolation using React Testing Library
+- **Maintainability**: Clear separation between UI (components) and logic (hooks)
+- **Predictability**: Data flow is unidirectional and explicit through hooks
 - **Type Safety**: Full TypeScript support with Result types for error handling

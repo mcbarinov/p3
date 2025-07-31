@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 
 import { Toaster } from "@/components/ui/sonner"
-import { services } from "@/services"
+import { useAuth } from "@/hooks"
 
 const formSchema = z.object({
   username: z.string().min(1, { message: "Username must be between 1 and 100 characters" }),
@@ -15,13 +15,14 @@ const formSchema = z.object({
 })
 
 export default function LoginPage() {
+  const { login, loading, error } = useAuth()
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: { username: "", password: "" },
   })
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    await services.auth.login(values.username, values.password)
+    await login(values.username, values.password)
   }
 
   return (
@@ -58,9 +59,10 @@ export default function LoginPage() {
                   </FormItem>
                 )}
               />
-              <Button type="submit" className="w-full mt-4" disabled={form.formState.isSubmitting}>
-                {form.formState.isSubmitting ? "Logging in..." : "Login"}
+              <Button type="submit" className="w-full mt-4" disabled={loading}>
+                {loading ? "Logging in..." : "Login"}
               </Button>
+              {error && <div className="text-red-600 text-sm mt-2">{error.error}</div>}
             </form>
           </Form>
         </CardContent>
