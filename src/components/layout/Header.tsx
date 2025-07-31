@@ -2,7 +2,7 @@ import { Link } from "react-router"
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu"
 import { useAuthStore } from "@/stores/authStore"
 import { ChevronDown, User } from "lucide-react"
-import { authService } from "@/services/authService"
+import { services } from "@/services"
 
 export default function Header() {
   const { username } = useAuthStore()
@@ -20,7 +20,7 @@ export default function Header() {
           </DropdownMenuTrigger>
           <DropdownMenuContent>
             <DropdownMenuItem>Change Password</DropdownMenuItem>
-            <DropdownMenuItem onClick={authService.logout}>Logout</DropdownMenuItem>
+            <DropdownMenuItem onClick={services.auth.logout}>Logout</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </nav>

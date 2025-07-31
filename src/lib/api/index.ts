@@ -1,4 +1,5 @@
 import ky, { HTTPError } from "ky"
+import { err, ok, Result } from "neverthrow"
 import { useAuthStore } from "../../stores/authStore"
 
 export interface ApiError {
@@ -6,7 +7,7 @@ export interface ApiError {
   code: number
 }
 
-export async function parseApiError(error: unknown): Promise<ApiError> {
+async function parseApiError(error: unknown): Promise<ApiError> {
   // Handle ky HTTPError
   if (error instanceof HTTPError) {
     const status = error.response.status
@@ -57,7 +58,7 @@ export async function parseApiError(error: unknown): Promise<ApiError> {
   }
 }
 
-export const api = ky.create({
+const api = ky.create({
   prefixUrl: "/api",
   hooks: {
     beforeRequest: [
@@ -75,3 +76,24 @@ export const api = ky.create({
     ],
   },
 })
+
+async function apiRequest<T>(request: Promise<T>): Promise<Result<T, ApiError>> {
+  try {
+    const res = await request
+    return ok(res)
+  } catch (error) {
+    return err(await parseApiError(error))
+  }
+}
+
+export const apiClient = {
+  get: <T>(url: string) => apiRequest(api.get(url).json<T>()),
+
+  post: <T>(url: string, data?: unknown) => apiRequest(api.post(url, { json: data }).json<T>()),
+
+  put: <T>(url: string, data?: unknown) => apiRequest(api.put(url, { json: data }).json<T>()),
+
+  patch: <T>(url: string, data?: unknown) => apiRequest(api.patch(url, { json: data }).json<T>()),
+
+  delete: <T>(url: string) => apiRequest(api.delete(url).json<T>()),
+}

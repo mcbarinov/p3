@@ -46,6 +46,12 @@ The project implements a forum system where:
 
 ## Architecture Decisions
 
+### Core Principles
+
+- **Simplicity First**: All implementations prioritize simplicity over premature optimization
+- **Developer Experience**: APIs are designed to be intuitive and require minimal boilerplate
+- **Consistency**: Similar patterns are used across all layers for predictability
+
 ### Three-Layer Architecture
 
 The application follows a strict three-layer architecture pattern:
@@ -61,29 +67,36 @@ The application follows a strict three-layer architecture pattern:
 
 #### 2. HTTP API Layer
 
-- **Principle**: Minimal HTTP abstraction
+- **Principle**: Minimal HTTP abstraction with simplified interface
 - **Rules**:
   - No store access or state management
   - No side effects
   - Returns `Result<T, E>` for explicit error handling
   - Clean interfaces for request/response types
+  - Uses unified `apiClient` wrapper for DRY code
 - **Example**: `authApi.login()` returns `Result<LoginResponse, ApiError>`
+- **Implementation**: All API methods use `apiClient.get/post/put/patch/delete<T>()` for consistency
 
 **Architectural Exception**: The base API client (`api/index.ts`) accesses `authStore` to automatically attach session headers to all requests. This is an intentional violation for developer convenience, eliminating the need to manually pass sessionId to every authenticated API call.
 
 #### 3. Services (Business Logic)
 
-- **Principle**: Orchestration and side effects
+- **Principle**: Orchestration and side effects with simplified interface
 - **Rules**:
   - Combines stores, APIs, and other services
   - Handles all side effects (navigation, toasts, etc.)
   - Contains business logic and workflows
-  - Used directly by React components
-- **Example**: `authService.login()` calls API, updates store, shows toast, and navigates
+  - Returns `Promise<void>` - no Result handling needed in components
+  - All error handling (toasts, redirects) happens internally
+  - Used directly by React components via unified `services` export
+- **Example**: `services.auth.login()` calls API, updates store, shows toast, and navigates
+- **Access Pattern**: `import { services } from "@/services"` → `services.auth.login()`
 
 ### Benefits
 
+- **Simplicity**: Minimal boilerplate, intuitive APIs, easy to understand
+- **Developer Experience**: Single import for services, no Result handling in components
 - **Testability**: Each layer can be tested in isolation
-- **Maintainability**: Clear separation of concerns
+- **Maintainability**: Clear separation of concerns with consistent patterns
 - **Predictability**: Data flow is unidirectional and explicit
 - **Type Safety**: Full TypeScript support with Result types for error handling

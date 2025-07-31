@@ -1,5 +1,5 @@
-import { api, type ApiError, parseApiError } from "."
-import { err, ok, Result } from "neverthrow"
+import { type ApiError, apiClient } from "."
+import { Result } from "neverthrow"
 
 export interface LoginRequest {
   username: string
@@ -12,21 +12,7 @@ export interface LoginResponse {
 }
 
 export const authApi = {
-  login: async (data: LoginRequest): Promise<Result<LoginResponse, ApiError>> => {
-    try {
-      const res = await api.post("auth/login", { json: data }).json<LoginResponse>()
-      return ok(res)
-    } catch (error) {
-      return err(await parseApiError(error))
-    }
-  },
+  login: (data: LoginRequest): Promise<Result<LoginResponse, ApiError>> => apiClient.post<LoginResponse>("auth/login", data),
 
-  logout: async (): Promise<Result<{ message: string }, ApiError>> => {
-    try {
-      const res = await api.post("auth/logout").json<{ message: string }>()
-      return ok(res)
-    } catch (error) {
-      return err(await parseApiError(error))
-    }
-  },
+  logout: (): Promise<Result<{ message: string }, ApiError>> => apiClient.post<{ message: string }>("auth/logout"),
 }

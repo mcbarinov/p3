@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 
 import { Toaster } from "@/components/ui/sonner"
-import { authService } from "@/services/authService"
+import { services } from "@/services"
 
 const formSchema = z.object({
   username: z.string().min(1, { message: "Username must be between 1 and 100 characters" }),
@@ -21,7 +21,7 @@ export default function LoginPage() {
   })
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    await authService.login(values.username, values.password)
+    await services.auth.login(values.username, values.password)
   }
 
   return (

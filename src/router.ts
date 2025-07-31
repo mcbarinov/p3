@@ -2,6 +2,7 @@ import { createBrowserRouter, redirect } from "react-router"
 import LoginPage from "./components/pages/LoginPage"
 import Layout from "./components/layout/Layout"
 import IndexPage from "./components/pages/IndexPage"
+import ForumsPage from "./pages/ForumsPage"
 import { useAuthStore } from "./stores/authStore"
 
 function requireAuth() {
@@ -21,6 +22,9 @@ export const router = createBrowserRouter([
     path: "/",
     Component: Layout,
     loader: requireAuth,
-    children: [{ index: true, Component: IndexPage }],
+    children: [
+      { index: true, Component: IndexPage },
+      { path: "forums", Component: ForumsPage },
+    ],
   },
 ])
