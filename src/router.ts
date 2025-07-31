@@ -1,8 +1,9 @@
 import { createBrowserRouter, redirect } from "react-router"
-import LoginPage from "./components/pages/LoginPage"
+import LoginPage from "./pages/LoginPage"
 import Layout from "./components/layout/Layout"
-import IndexPage from "./components/pages/IndexPage"
+import IndexPage from "./pages/IndexPage"
 import ForumsPage from "./pages/ForumsPage"
+import ForumDetailPage from "./pages/ForumDetailPage"
 import { useAuthStore } from "./stores/authStore"
 
 function requireAuth() {
@@ -25,6 +26,7 @@ export const router = createBrowserRouter([
     children: [
       { index: true, Component: IndexPage },
       { path: "forums", Component: ForumsPage },
+      { path: "forums/:forumId", Component: ForumDetailPage },
     ],
   },
 ])

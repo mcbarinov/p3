@@ -12,4 +12,14 @@ export const forumService = {
       toast.error("Failed to load forums")
     }
   },
+
+  loadForumPosts: async (forumId: number): Promise<void> => {
+    const result = await forumApi.getForumPosts(forumId)
+
+    if (result.isOk()) {
+      useForumStore.getState().setPosts(result.value)
+    } else {
+      toast.error("Failed to load forum posts")
+    }
+  },
 }

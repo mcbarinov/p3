@@ -7,6 +7,7 @@ export type Forum = {
 
 export type Post = {
   id: number
+  forumId: number
   title: string
   content: string
   authorId: number

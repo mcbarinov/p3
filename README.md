@@ -92,7 +92,52 @@ The application follows a strict three-layer architecture pattern:
 - **Example**: `services.auth.login()` calls API, updates store, shows toast, and navigates
 - **Access Pattern**: `import { services } from "@/services"` → `services.auth.login()`
 
-### Benefits
+### Component Organization
+
+Components are organized using a **file-or-folder strategy** based on complexity:
+
+```
+src/
+├── components/
+│   ├── ui/                    # Global UI components (Button, Card, Input)
+│   ├── layout/                # Layout components (Header, Footer, Layout)
+│   └── shared/                # Reusable business components (used across pages)
+├── pages/
+│   ├── DashboardPage/
+│   │   ├── DashboardPage.tsx    # Main component (same name as folder)
+│   │   ├── UserStats.tsx        # Page-specific components
+│   │   └── SalesChart.tsx
+│   └── LoginPage.tsx            # Simple pages as files
+```
+
+#### Organization Rules
+
+1. **Simple Pages (File Structure)**:
+   - Use single `.tsx` file for simple pages
+   - No page-specific components needed
+   - Example: `LoginPage.tsx`, `IndexPage.tsx`
+
+2. **Complex Pages (Folder Structure)**:
+   - Use folder when page becomes complex or needs page-specific components
+   - Main component file has same name as folder (no `index.tsx`)
+   - Page-specific components live alongside main component
+   - All folders and main files should have `Page` suffix
+   - Example: `DashboardPage/DashboardPage.tsx`
+
+3. **Component Categories**:
+   - **`components/ui/`**: Reusable UI primitives (Button, Card, Input)
+   - **`components/layout/`**: Application layout components
+   - **`components/shared/`**: Business components used across multiple pages
+   - **`pages/PageNamePage/`**: Components used only within specific page
+
+#### Benefits
+
+- **Editor Navigation**: No multiple `index.tsx` files, easy file identification
+- **Clear Boundaries**: Obvious separation between reusable and page-specific components
+- **Scalability**: Simple pages stay simple, complex pages can grow organically
+- **Predictable Structure**: Consistent naming and organization patterns
+
+## Architecture Benefits
 
 - **Simplicity**: Minimal boilerplate, intuitive APIs, easy to understand
 - **Developer Experience**: Single import for services, no Result handling in components
