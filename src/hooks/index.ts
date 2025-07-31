@@ -1,2 +1,2 @@
 export { useAuth } from "./useAuth"
-export { useForums } from "./useForums"
+export { useLoadForums } from "./useForums"

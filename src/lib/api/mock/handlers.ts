@@ -1,5 +1,5 @@
 import { http, HttpResponse } from "msw"
-import type { Forum, Post } from "@/types"
+import type { Forum, Post, Comment } from "@/types"
 
 const USERS = [
   { userId: 1, username: "user1", password: "password1", sessionId: "session1" },
@@ -79,6 +79,65 @@ const POSTS: Post[] = [
   },
 ]
 
+const COMMENTS: Comment[] = [
+  {
+    id: 1,
+    content: "Great discussion starter! I completely agree with your points.",
+    authorId: 2,
+    createdAt: new Date("2024-01-15T10:30:00Z"),
+  },
+  {
+    id: 2,
+    content: "Thanks for creating this forum. Looking forward to more discussions!",
+    authorId: 1,
+    createdAt: new Date("2024-01-15T11:00:00Z"),
+  },
+  {
+    id: 3,
+    content: "My favorite hobby is definitely coding! What about you?",
+    authorId: 1,
+    createdAt: new Date("2024-01-16T15:00:00Z"),
+  },
+  {
+    id: 4,
+    content: "I love photography and hiking. Great way to clear the mind after coding all day.",
+    authorId: 2,
+    createdAt: new Date("2024-01-16T16:30:00Z"),
+  },
+  {
+    id: 5,
+    content: "I think both React and Vue have their strengths. React has a larger ecosystem, but Vue is easier to learn.",
+    authorId: 2,
+    createdAt: new Date("2024-01-16T12:00:00Z"),
+  },
+  {
+    id: 6,
+    content: "I prefer React for larger projects. The component model and hooks are really powerful.",
+    authorId: 1,
+    createdAt: new Date("2024-01-16T13:30:00Z"),
+  },
+  {
+    id: 7,
+    content: "Here's a great TypeScript tip: use 'const' assertions for literal types!",
+    authorId: 1,
+    createdAt: new Date("2024-01-18T17:00:00Z"),
+  },
+  {
+    id: 8,
+    content: "Don't forget about discriminated unions - they're super useful for state management.",
+    authorId: 2,
+    createdAt: new Date("2024-01-18T18:15:00Z"),
+  },
+]
+
+// Map comments to posts
+const POST_COMMENTS: Record<number, number[]> = {
+  1: [1, 2], // Welcome to General Discussion
+  2: [3, 4], // What's your favorite hobby?
+  4: [5, 6], // React vs Vue
+  5: [7, 8], // TypeScript tips and tricks
+}
+
 const sleep = (ms: number) => new Promise((res) => setTimeout(res, ms))
 
 export const handlers = [
@@ -122,5 +181,26 @@ export const handlers = [
     await sleep(500) // Simulate network delay
 
     return HttpResponse.json(forumPosts)
+  }),
+
+  http.get("/api/posts/:postId", async ({ params }) => {
+    const postId = Number(params.postId)
+    const post = POSTS.find((p) => p.id === postId)
+    await sleep(500) // Simulate network delay
+
+    if (post) {
+      return HttpResponse.json(post)
+    } else {
+      return HttpResponse.json({ error: "Post not found" }, { status: 404 })
+    }
+  }),
+
+  http.get("/api/posts/:postId/comments", async ({ params }) => {
+    const postId = Number(params.postId)
+    const commentIds = POST_COMMENTS[postId] || []
+    const comments = COMMENTS.filter((comment) => commentIds.includes(comment.id))
+    await sleep(500) // Simulate network delay
+
+    return HttpResponse.json(comments)
   }),
 ]

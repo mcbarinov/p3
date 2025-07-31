@@ -3,7 +3,7 @@ import { api } from "@/lib/api"
 import { useForumStore } from "@/stores/forumStore"
 import type { ApiError } from "@/lib/api"
 
-export function useForums() {
+export function useLoadForums() {
   const forums = useForumStore((state) => state.forums)
   const setForums = useForumStore((state) => state.setForums)
   const [loading, setLoading] = useState(false)
@@ -32,7 +32,6 @@ export function useForums() {
   }, [forums.length, loading, error, loadForums])
 
   return {
-    forums,
     loading,
     error,
     refetch: loadForums,

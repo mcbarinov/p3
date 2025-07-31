@@ -1,9 +1,11 @@
 import { Link } from "react-router"
 import { Users } from "lucide-react"
-import { useForums } from "@/hooks"
+import { useLoadForums } from "@/hooks"
+import { useForumStore } from "@/stores/forumStore"
 
 export default function ForumsPage() {
-  const { forums, loading, error } = useForums()
+  const forums = useForumStore((state) => state.forums)
+  const { loading, error } = useLoadForums()
 
   if (loading) {
     return (

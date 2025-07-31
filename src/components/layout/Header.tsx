@@ -9,7 +9,7 @@ export default function Header() {
   return (
     <header className="border-b py-5">
       <nav className="flex items-center h-14 gap-8">
-        <h1>P3</h1>
+        <h1>Demo Forums</h1>
         <Link to="/forums">Forums</Link>
         <DropdownMenu>
           <DropdownMenuTrigger className="flex items-center gap-1">
