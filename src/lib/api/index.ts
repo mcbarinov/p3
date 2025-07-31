@@ -62,6 +62,11 @@ export const api = ky.create({
   hooks: {
     beforeRequest: [
       (request) => {
+        // ARCHITECTURAL EXCEPTION: We intentionally access the auth store here
+        // to automatically attach session headers to all API requests.
+        // This violates our principle that API layer should not access stores,
+        // but provides significant developer convenience by eliminating the need
+        // to manually pass sessionId to every authenticated API call.
         const sessionId = useAuthStore.getState().sessionId
         if (sessionId) {
           request.headers.set("X-Session-ID", sessionId)
