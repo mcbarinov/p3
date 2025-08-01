@@ -2,11 +2,9 @@ import { Outlet } from "react-router"
 import Footer from "./Footer"
 import Header from "./Header"
 import { Toaster } from "@/components/ui/sonner"
-import { useLoadForums } from "@/hooks"
 
 export default function Layout() {
-  // Initialize forums data when app starts
-  useLoadForums()
+  // TanStack Query handles caching automatically - no need to initialize
   return (
     <div className="min-h-screen flex flex-col 	max-w-screen-xl mx-auto">
       <Toaster position="top-center" />

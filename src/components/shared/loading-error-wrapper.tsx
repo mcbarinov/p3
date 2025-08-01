@@ -1,9 +1,8 @@
 import type { ReactNode } from "react"
-import type { ApiError } from "@/lib/api"
 
 interface LoadingErrorWrapperProps {
   loading: boolean
-  error: ApiError | null
+  error: Error | null
   loadingMessage?: string
   errorPrefix?: string
   children: ReactNode
@@ -28,7 +27,7 @@ export function LoadingErrorWrapper({
     return (
       <div className="container mx-auto py-8">
         <div className="text-center text-red-600">
-          {errorPrefix}: {error.error}
+          {errorPrefix}: {error.message}
         </div>
       </div>
     )

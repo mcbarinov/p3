@@ -1,17 +1,23 @@
 import { Link, useParams } from "react-router"
+import { useQuery } from "@tanstack/react-query"
 import { ArrowLeft, Plus } from "lucide-react"
-import { useForumStore } from "@/stores/forumStore"
 import { api } from "@/lib/api"
-import { useApi } from "@/hooks"
+import { useForumById } from "@/lib/useForums"
 import { LoadingErrorWrapper, UserInfo, DateInfo } from "@/components/shared"
 import { Button } from "@/components/ui/button"
 
 export default function ForumPostsPage() {
   const { forumId } = useParams<{ forumId: string }>()
-  const getForumById = useForumStore((state) => state.getForumById)
-  const forum = getForumById(Number(forumId))
+  const forum = useForumById(Number(forumId))
 
-  const { data: posts, loading, error } = useApi(() => api.forum.getForumPosts(Number(forumId)), [forumId])
+  const {
+    data: posts,
+    isPending: loading,
+    error,
+  } = useQuery({
+    queryKey: ["forum-posts", forumId],
+    queryFn: () => api.forum.getForumPosts(Number(forumId)),
+  })
 
   if (!forum) {
     return (

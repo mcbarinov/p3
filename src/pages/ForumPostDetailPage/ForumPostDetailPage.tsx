@@ -1,16 +1,17 @@
 import { useParams } from "react-router"
 import { Link } from "react-router"
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { ArrowLeft, MessageCircle } from "lucide-react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { toast } from "sonner"
-import { useForumStore } from "@/stores/forumStore"
 import { api } from "@/lib/api"
-import { useApi } from "@/hooks"
+import { useForumById } from "@/lib/useForums"
 import { LoadingErrorWrapper, UserInfo, DateInfo } from "@/components/shared"
 import { Form, FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form"
 import { Button } from "@/components/ui/button"
+import type { Comment } from "@/types"
 
 const commentFormSchema = z.object({
   content: z
@@ -21,28 +22,41 @@ const commentFormSchema = z.object({
 
 export default function ForumPostDetailPage() {
   const { forumId, postId } = useParams<{ forumId: string; postId: string }>()
-  const getForumById = useForumStore((state) => state.getForumById)
+  const queryClient = useQueryClient()
   const numericPostId = Number(postId)
-  const forum = getForumById(Number(forumId))
+  const forum = useForumById(Number(forumId))
 
   // Load post data
-  const { data: post, loading: postLoading, error: postError } = useApi(() => api.forum.getPost(numericPostId), [numericPostId])
+  const {
+    data: post,
+    isPending: postLoading,
+    error: postError,
+  } = useQuery({
+    queryKey: ["post", numericPostId],
+    queryFn: () => api.forum.getPost(numericPostId),
+  })
 
   // Load comments data
   const {
     data: comments,
-    loading: commentsLoading,
+    isPending: commentsLoading,
     error: commentsError,
-    execute: refetchComments,
-  } = useApi(() => api.forum.getPostComments(numericPostId), [numericPostId])
+  } = useQuery({
+    queryKey: ["post-comments", numericPostId],
+    queryFn: () => api.forum.getPostComments(numericPostId),
+  })
 
   // Comment creation
-  const {
-    loading: createLoading,
-    error: createError,
-    execute: createComment,
-  } = useApi((content?: string) => api.forum.createComment({ content: content!, postId: numericPostId }), [], {
-    immediate: false,
+  const createCommentMutation = useMutation({
+    mutationFn: (content: string) => api.forum.createComment({ content, postId: numericPostId }),
+    onSuccess: () => {
+      toast.success("Comment added successfully!")
+      form.reset()
+      queryClient.invalidateQueries({ queryKey: ["post-comments", numericPostId] })
+    },
+    onError: (error) => {
+      toast.error("Failed to add comment: " + error.message)
+    },
   })
 
   // Comment form
@@ -52,15 +66,7 @@ export default function ForumPostDetailPage() {
   })
 
   const onSubmit = async (values: z.infer<typeof commentFormSchema>) => {
-    const result = await createComment(values.content)
-
-    if (result.isOk()) {
-      toast.success("Comment added successfully!")
-      form.reset()
-      refetchComments()
-    } else {
-      toast.error("Failed to add comment")
-    }
+    createCommentMutation.mutate(values.content)
   }
 
   // If postId is invalid, it's a routing error
@@ -137,14 +143,16 @@ export default function ForumPostDetailPage() {
                     )}
                   />
                   <div className="flex gap-2">
-                    <Button type="submit" disabled={createLoading}>
-                      {createLoading ? "Posting..." : "Post Comment"}
+                    <Button type="submit" disabled={createCommentMutation.isPending}>
+                      {createCommentMutation.isPending ? "Posting..." : "Post Comment"}
                     </Button>
                     <Button type="button" variant="outline" onClick={() => form.reset()}>
                       Clear
                     </Button>
                   </div>
-                  {createError && <div className="text-red-600 text-sm">{createError.error}</div>}
+                  {createCommentMutation.error && (
+                    <div className="text-red-600 text-sm">{createCommentMutation.error.message}</div>
+                  )}
                 </form>
               </Form>
             </div>
@@ -162,7 +170,7 @@ export default function ForumPostDetailPage() {
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {comments.map((comment) => (
+                  {comments.map((comment: Comment) => (
                     <div key={comment.id} className="bg-gray-50 rounded-lg p-4 border border-gray-200">
                       <div className="flex items-center justify-between mb-2">
                         <div className="flex items-center space-x-4 text-sm text-gray-600">

@@ -1,4 +1,5 @@
 import { useParams, useNavigate, Link } from "react-router"
+import { useMutation } from "@tanstack/react-query"
 import { ArrowLeft } from "lucide-react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -8,9 +9,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { useForumStore } from "@/stores/forumStore"
 import { api } from "@/lib/api"
-import { useApi } from "@/hooks"
+import { useForumById } from "@/lib/useForums"
 
 const formSchema = z.object({
   title: z.string().min(1, { message: "Title is required" }).max(200, { message: "Title must be less than 200 characters" }),
@@ -22,16 +22,18 @@ const formSchema = z.object({
 
 export default function CreatePostPage() {
   const { forumId } = useParams<{ forumId: string }>()
-  const getForumById = useForumStore((state) => state.getForumById)
-  const forum = getForumById(Number(forumId))
+  const forum = useForumById(Number(forumId))
   const navigate = useNavigate()
 
-  const {
-    loading,
-    error,
-    execute: createPost,
-  } = useApi((data?: { title: string; content: string }) => api.forum.createPost({ ...data!, forumId: Number(forumId) }), [], {
-    immediate: false,
+  const createPostMutation = useMutation({
+    mutationFn: (data: { title: string; content: string }) => api.forum.createPost({ ...data, forumId: Number(forumId) }),
+    onSuccess: (data) => {
+      toast.success("Post created successfully!")
+      navigate(`/forums/${forumId}/${data.id}`)
+    },
+    onError: (error) => {
+      toast.error("Failed to create post: " + error.message)
+    },
   })
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -40,14 +42,7 @@ export default function CreatePostPage() {
   })
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    const result = await createPost(values)
-
-    if (result.isOk()) {
-      toast.success("Post created successfully!")
-      navigate(`/forums/${forumId}/${result.value.id}`)
-    } else {
-      toast.error("Failed to create post")
-    }
+    createPostMutation.mutate(values)
   }
 
   if (!forum) {
@@ -106,14 +101,14 @@ export default function CreatePostPage() {
                 )}
               />
               <div className="flex gap-4">
-                <Button type="submit" disabled={loading}>
-                  {loading ? "Creating..." : "Create Post"}
+                <Button type="submit" disabled={createPostMutation.isPending}>
+                  {createPostMutation.isPending ? "Creating..." : "Create Post"}
                 </Button>
                 <Button type="button" variant="outline" onClick={() => form.reset()}>
                   Clear
                 </Button>
               </div>
-              {error && <div className="text-red-600 text-sm">{error.error}</div>}
+              {createPostMutation.error && <div className="text-red-600 text-sm">{createPostMutation.error.message}</div>}
             </form>
           </Form>
         </CardContent>

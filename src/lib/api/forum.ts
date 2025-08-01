@@ -1,6 +1,5 @@
-import { Result } from "neverthrow"
 import type { Forum, Post, Comment } from "@/types"
-import { type ApiError, apiClient } from "."
+import { apiClient } from "."
 
 export type CreatePostRequest = {
   title: string
@@ -14,18 +13,18 @@ export type CreateCommentRequest = {
 }
 
 export const forumApi = {
-  getForums: (): Promise<Result<Forum[], ApiError>> => apiClient.get<Forum[]>("forums"),
+  getForums: (): Promise<Forum[]> => apiClient.get<Forum[]>("forums"),
 
-  getForum: (forumId: number): Promise<Result<Forum, ApiError>> => apiClient.get<Forum>(`forums/${forumId}`),
+  getForum: (forumId: number): Promise<Forum> => apiClient.get<Forum>(`forums/${forumId}`),
 
-  getForumPosts: (forumId: number): Promise<Result<Post[], ApiError>> => apiClient.get<Post[]>(`forums/${forumId}/posts`),
+  getForumPosts: (forumId: number): Promise<Post[]> => apiClient.get<Post[]>(`forums/${forumId}/posts`),
 
-  getPost: (postId: number): Promise<Result<Post, ApiError>> => apiClient.get<Post>(`posts/${postId}`),
+  getPost: (postId: number): Promise<Post> => apiClient.get<Post>(`posts/${postId}`),
 
-  getPostComments: (postId: number): Promise<Result<Comment[], ApiError>> => apiClient.get<Comment[]>(`posts/${postId}/comments`),
+  getPostComments: (postId: number): Promise<Comment[]> => apiClient.get<Comment[]>(`posts/${postId}/comments`),
 
-  createPost: (request: CreatePostRequest): Promise<Result<Post, ApiError>> => apiClient.post<Post>("posts", request),
+  createPost: (request: CreatePostRequest): Promise<Post> => apiClient.post<Post>("posts", request),
 
-  createComment: (request: CreateCommentRequest): Promise<Result<Comment, ApiError>> =>
+  createComment: (request: CreateCommentRequest): Promise<Comment> =>
     apiClient.post<Comment>(`posts/${request.postId}/comments`, request),
 }

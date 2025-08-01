@@ -1,5 +1,4 @@
-import { type ApiError, apiClient } from "."
-import { Result } from "neverthrow"
+import { apiClient } from "."
 
 export interface LoginRequest {
   username: string
@@ -12,7 +11,7 @@ export interface LoginResponse {
 }
 
 export const authApi = {
-  login: (data: LoginRequest): Promise<Result<LoginResponse, ApiError>> => apiClient.post<LoginResponse>("auth/login", data),
+  login: (data: LoginRequest): Promise<LoginResponse> => apiClient.post<LoginResponse>("auth/login", data),
 
-  logout: (): Promise<Result<{ message: string }, ApiError>> => apiClient.post<{ message: string }>("auth/logout"),
+  logout: (): Promise<{ message: string }> => apiClient.post<{ message: string }>("auth/logout"),
 }

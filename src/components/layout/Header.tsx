@@ -1,10 +1,21 @@
-import { Link } from "react-router"
+import { Link, useNavigate } from "react-router"
+import { useMutation } from "@tanstack/react-query"
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu"
 import { ChevronDown, User } from "lucide-react"
-import { useAuth } from "@/hooks"
+import { useAuthStore } from "@/stores/authStore"
+import { api } from "@/lib/api"
 
 export default function Header() {
-  const { username, logout } = useAuth()
+  const navigate = useNavigate()
+  const { username, logout: storeLogout } = useAuthStore()
+
+  const logoutMutation = useMutation({
+    mutationFn: () => api.auth.logout(),
+    onSuccess: () => {
+      storeLogout()
+      navigate("/login")
+    },
+  })
 
   return (
     <header className="border-b py-5">
@@ -19,7 +30,7 @@ export default function Header() {
           </DropdownMenuTrigger>
           <DropdownMenuContent>
             <DropdownMenuItem>Change Password</DropdownMenuItem>
-            <DropdownMenuItem onClick={logout}>Logout</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => logoutMutation.mutate()}>Logout</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </nav>

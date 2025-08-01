@@ -1,10 +1,14 @@
 import ky, { HTTPError } from "ky"
-import { err, ok, Result } from "neverthrow"
 import { useAuthStore } from "../../stores/authStore"
 
-export interface ApiError {
-  error: string
-  code: number
+export class ApiError extends Error {
+  public readonly code: number
+
+  constructor(message: string, code: number) {
+    super(message)
+    this.name = "ApiError"
+    this.code = code
+  }
 }
 
 async function parseApiError(error: unknown): Promise<ApiError> {
@@ -16,46 +20,28 @@ async function parseApiError(error: unknown): Promise<ApiError> {
       const data = await error.response.json()
       // Check if response has error field
       if (typeof data === "object" && data !== null && "error" in data) {
-        return {
-          error: String(data.error),
-          code: status,
-        }
+        return new ApiError(String(data.error), status)
       }
       // Fallback to stringifying the response
-      return {
-        error: JSON.stringify(data),
-        code: status,
-      }
+      return new ApiError(JSON.stringify(data), status)
     } catch {
       // If JSON parsing fails, use status text
-      return {
-        error: error.response.statusText || `HTTP ${status} error`,
-        code: status,
-      }
+      return new ApiError(error.response.statusText || `HTTP ${status} error`, status)
     }
   }
 
   // Handle network errors (server not responding)
   if (error instanceof TypeError && error.message.includes("fetch")) {
-    return {
-      error: "Network error: Server is not responding",
-      code: 0,
-    }
+    return new ApiError("Network error: Server is not responding", 0)
   }
 
   // Handle any other errors
   if (error instanceof Error) {
-    return {
-      error: error.message,
-      code: 500,
-    }
+    return new ApiError(error.message, 500)
   }
 
   // Fallback for unknown errors
-  return {
-    error: "Unknown error occurred",
-    code: 500,
-  }
+  return new ApiError("Unknown error occurred", 500)
 }
 
 const httpClient = ky.create({
@@ -77,12 +63,11 @@ const httpClient = ky.create({
   },
 })
 
-async function apiRequest<T>(request: Promise<T>): Promise<Result<T, ApiError>> {
+async function apiRequest<T>(request: Promise<T>): Promise<T> {
   try {
-    const res = await request
-    return ok(res)
+    return await request
   } catch (error) {
-    return err(await parseApiError(error))
+    throw await parseApiError(error)
   }
 }
 

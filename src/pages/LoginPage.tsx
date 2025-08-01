@@ -1,13 +1,16 @@
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
+import { useNavigate } from "react-router"
+import { useMutation } from "@tanstack/react-query"
+import { toast } from "sonner"
 import { z } from "zod"
 import { Form, FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-
 import { Toaster } from "@/components/ui/sonner"
-import { useAuth } from "@/hooks"
+import { api } from "@/lib/api"
+import { useAuthStore } from "@/stores/authStore"
 
 const formSchema = z.object({
   username: z.string().min(1, { message: "Username must be between 1 and 100 characters" }),
@@ -15,14 +18,28 @@ const formSchema = z.object({
 })
 
 export default function LoginPage() {
-  const { login, loading, error } = useAuth()
+  const navigate = useNavigate()
+  const login = useAuthStore((state) => state.login)
+
+  const loginMutation = useMutation({
+    mutationFn: (credentials: { username: string; password: string }) => api.auth.login(credentials),
+    onSuccess: (data, variables) => {
+      login(data.sessionId, data.userId, variables.username)
+      toast.success("Login successful")
+      navigate("/")
+    },
+    onError: (error) => {
+      toast.error("Login failed: " + error.message)
+    },
+  })
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: { username: "", password: "" },
   })
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    await login(values.username, values.password)
+    loginMutation.mutate(values)
   }
 
   return (
@@ -59,10 +76,10 @@ export default function LoginPage() {
                   </FormItem>
                 )}
               />
-              <Button type="submit" className="w-full mt-4" disabled={loading}>
-                {loading ? "Logging in..." : "Login"}
+              <Button type="submit" className="w-full mt-4" disabled={loginMutation.isPending}>
+                {loginMutation.isPending ? "Logging in..." : "Login"}
               </Button>
-              {error && <div className="text-red-600 text-sm mt-2">{error.error}</div>}
+              {loginMutation.error && <div className="text-red-600 text-sm mt-2">{loginMutation.error.message}</div>}
             </form>
           </Form>
         </CardContent>
