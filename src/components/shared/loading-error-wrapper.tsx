@@ -9,12 +9,12 @@ interface LoadingErrorWrapperProps {
   children: ReactNode
 }
 
-export function LoadingErrorWrapper({ 
-  loading, 
-  error, 
-  loadingMessage = "Loading...", 
+export function LoadingErrorWrapper({
+  loading,
+  error,
+  loadingMessage = "Loading...",
   errorPrefix = "Error",
-  children 
+  children,
 }: LoadingErrorWrapperProps) {
   if (loading) {
     return (
@@ -27,7 +27,9 @@ export function LoadingErrorWrapper({
   if (error) {
     return (
       <div className="container mx-auto py-8">
-        <div className="text-center text-red-600">{errorPrefix}: {error.error}</div>
+        <div className="text-center text-red-600">
+          {errorPrefix}: {error.error}
+        </div>
       </div>
     )
   }

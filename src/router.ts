@@ -4,7 +4,8 @@ import Layout from "./components/layout/Layout"
 import IndexPage from "./pages/IndexPage"
 import ForumsPage from "./pages/ForumsPage"
 import ForumPostsPage from "./pages/ForumPostsPage"
-import ForumPostDetailPage from "./pages/ForumPostDetailPage"
+import ForumPostDetailPage from "./pages/ForumPostDetailPage/ForumPostDetailPage"
+import CreatePostPage from "./pages/CreatePostPage"
 import { useAuthStore } from "./stores/authStore"
 
 function requireAuth() {
@@ -28,6 +29,7 @@ export const router = createBrowserRouter([
       { index: true, Component: IndexPage },
       { path: "forums", Component: ForumsPage },
       { path: "forums/:forumId", Component: ForumPostsPage },
+      { path: "forums/:forumId/new", Component: CreatePostPage },
       { path: "forums/:forumId/:postId", Component: ForumPostDetailPage },
     ],
   },

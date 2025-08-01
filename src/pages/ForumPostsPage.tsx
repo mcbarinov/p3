@@ -1,56 +1,17 @@
-import { useState, useCallback, useEffect } from "react"
 import { Link, useParams } from "react-router"
-import { ArrowLeft } from "lucide-react"
+import { ArrowLeft, Plus } from "lucide-react"
 import { useForumStore } from "@/stores/forumStore"
 import { api } from "@/lib/api"
+import { useApi } from "@/hooks"
 import { LoadingErrorWrapper, UserInfo, DateInfo } from "@/components/shared"
-import type { ApiError } from "@/lib/api"
-import type { Post } from "@/types"
-
-// Local hook - used only in this component
-function usePosts(forumId: number | undefined) {
-  const [posts, setPosts] = useState<Post[]>([])
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<ApiError | null>(null)
-
-  const loadPosts = useCallback(async () => {
-    if (!forumId) return
-
-    setLoading(true)
-    setError(null)
-
-    const result = await api.forum.getForumPosts(forumId)
-
-    if (result.isOk()) {
-      setPosts(result.value)
-    } else {
-      setError(result.error)
-      setPosts([])
-    }
-
-    setLoading(false)
-  }, [forumId])
-
-  // Auto-load posts when forumId changes
-  useEffect(() => {
-    if (forumId) {
-      loadPosts()
-    }
-  }, [forumId, loadPosts])
-
-  return {
-    posts,
-    loading,
-    error,
-    refetch: loadPosts,
-  }
-}
+import { Button } from "@/components/ui/button"
 
 export default function ForumPostsPage() {
   const { forumId } = useParams<{ forumId: string }>()
   const getForumById = useForumStore((state) => state.getForumById)
   const forum = getForumById(Number(forumId))
-  const { posts, loading, error } = usePosts(Number(forumId))
+
+  const { data: posts, loading, error } = useApi(() => api.forum.getForumPosts(Number(forumId)), [forumId])
 
   if (!forum) {
     return (
@@ -61,12 +22,7 @@ export default function ForumPostsPage() {
   }
 
   return (
-    <LoadingErrorWrapper 
-      loading={loading} 
-      error={error} 
-      loadingMessage="Loading posts..."
-      errorPrefix="Error loading posts"
-    >
+    <LoadingErrorWrapper loading={loading} error={error} loadingMessage="Loading posts..." errorPrefix="Error loading posts">
       <div className="container mx-auto py-8">
         <div className="mb-6">
           <Link to="/forums" className="inline-flex items-center text-blue-600 hover:text-blue-800 mb-4">
@@ -74,9 +30,19 @@ export default function ForumPostsPage() {
             Back to Forums
           </Link>
 
-          <h1 className="text-3xl font-bold mb-2">{forum.title}</h1>
-          <p className="text-gray-600 mb-4">{forum.description}</p>
-          <div className="text-sm text-gray-500">{forum.members.length} members</div>
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h1 className="text-3xl font-bold mb-2">{forum.title}</h1>
+              <p className="text-gray-600 mb-2">{forum.description}</p>
+              <div className="text-sm text-gray-500">{forum.members.length} members</div>
+            </div>
+            <Link to={`/forums/${forumId}/new`}>
+              <Button className="flex items-center">
+                <Plus className="mr-2 h-4 w-4" />
+                Create Post
+              </Button>
+            </Link>
+          </div>
         </div>
 
         <div className="space-y-4">
@@ -84,8 +50,8 @@ export default function ForumPostsPage() {
             <div className="text-center py-8 text-gray-500">No posts in this forum yet.</div>
           ) : (
             posts.map((post) => (
-              <Link 
-                key={post.id} 
+              <Link
+                key={post.id}
                 to={`/forums/${forumId}/${post.id}`}
                 className="block bg-white rounded-lg border p-6 shadow-sm hover:shadow-md transition-shadow"
               >

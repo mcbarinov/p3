@@ -203,4 +203,63 @@ export const handlers = [
 
     return HttpResponse.json(comments)
   }),
+
+  http.post("/api/posts", async ({ request }) => {
+    const { title, content, forumId } = (await request.json()) as { title: string; content: string; forumId: number }
+
+    // Generate new post ID
+    const newId = Math.max(...POSTS.map((p) => p.id)) + 1
+
+    // For this demo, we'll use userId 1 as the author (in real app this would come from session)
+    const newPost: Post = {
+      id: newId,
+      forumId,
+      title,
+      content,
+      authorId: 1,
+      createdAt: new Date(),
+    }
+
+    // Add to mock data
+    POSTS.push(newPost)
+
+    await sleep(500) // Simulate network delay
+
+    return HttpResponse.json(newPost, { status: 201 })
+  }),
+
+  http.post("/api/posts/:postId/comments", async ({ request, params }) => {
+    const postId = Number(params.postId)
+    const { content } = (await request.json()) as { content: string }
+
+    // Check if post exists
+    const post = POSTS.find((p) => p.id === postId)
+    if (!post) {
+      return HttpResponse.json({ error: "Post not found" }, { status: 404 })
+    }
+
+    // Generate new comment ID
+    const newId = Math.max(...COMMENTS.map((c) => c.id)) + 1
+
+    // For this demo, we'll use userId 1 as the author (in real app this would come from session)
+    const newComment: Comment = {
+      id: newId,
+      content,
+      authorId: 1,
+      createdAt: new Date(),
+    }
+
+    // Add to mock data
+    COMMENTS.push(newComment)
+
+    // Update the POST_COMMENTS mapping
+    if (!POST_COMMENTS[postId]) {
+      POST_COMMENTS[postId] = []
+    }
+    POST_COMMENTS[postId].push(newId)
+
+    await sleep(500) // Simulate network delay
+
+    return HttpResponse.json(newComment, { status: 201 })
+  }),
 ]
