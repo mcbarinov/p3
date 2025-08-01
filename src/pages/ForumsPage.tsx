@@ -1,6 +1,6 @@
 import { Link } from "react-router"
 import { Users } from "lucide-react"
-import { useForums } from "@/lib/useForums"
+import { useForums } from "@/hooks/useForums"
 
 export default function ForumsPage() {
   const { data: forums, isPending: loading, error } = useForums()

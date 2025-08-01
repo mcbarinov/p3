@@ -10,7 +10,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { api } from "@/lib/api"
-import { useForumById } from "@/lib/useForums"
+import { useForumById } from "@/hooks/useForums"
 
 const formSchema = z.object({
   title: z.string().min(1, { message: "Title is required" }).max(200, { message: "Title must be less than 200 characters" }),

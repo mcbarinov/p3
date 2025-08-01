@@ -2,7 +2,7 @@ import { Link, useParams } from "react-router"
 import { useQuery } from "@tanstack/react-query"
 import { ArrowLeft, Plus } from "lucide-react"
 import { api } from "@/lib/api"
-import { useForumById } from "@/lib/useForums"
+import { useForumById } from "@/hooks/useForums"
 import { LoadingErrorWrapper, UserInfo, DateInfo } from "@/components/shared"
 import { Button } from "@/components/ui/button"
 
